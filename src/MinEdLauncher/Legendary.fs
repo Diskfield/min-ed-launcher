@@ -20,20 +20,11 @@ let parseAccessToken (timeProvider: TimeProvider) json = result {
 
 let getAccessToken() =
     let potentialPaths =
-        if RuntimeInformation.IsOSPlatform(OSPlatform.Windows) then
-            [
-                Environment.GetEnvironmentVariable("LEGENDARY_CONFIG_PATH")
-                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".config", "legendary")
-                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "heroic", "legendaryConfig", "legendary")
-            ]
-        else if RuntimeInformation.IsOSPlatform(OSPlatform.Linux) then
-            [
-                Environment.GetEnvironmentVariable("LEGENDARY_CONFIG_PATH")
-                Environment.configDirFor "legendary"
-                Path.Combine(Environment.configDirFor "heroic", "legendaryConfig", "legendary")
-            ]
-        else
-            []
+        [
+            Environment.GetEnvironmentVariable("LEGENDARY_CONFIG_PATH")
+            Environment.configDirFor "legendary"
+            Path.Combine(Environment.configDirFor "heroic", "legendaryConfig", "legendary")
+        ]
         |> List.filter (fun p -> not (String.IsNullOrWhiteSpace(p)))
         
     potentialPaths

@@ -5,14 +5,9 @@ open System.Globalization
 open System.Runtime.InteropServices
 
 let potentialInstallPaths() =
-    if RuntimeInformation.IsOSPlatform(OSPlatform.Windows) then
-        let winProgFiles = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86)
-        [ $"%s{winProgFiles}\\Steam\\steamapps\\common\\Elite Dangerous" ]
-    elif RuntimeInformation.IsOSPlatform(OSPlatform.Linux) then
-        let home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)
-        [ $"%s{home}/.steam/steam/steamapps/common/Elite Dangerous"
-          $"%s{home}/.local/share/Steam/steamapps/common/Elite Dangerous" ]
-    else []
+    let home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)
+    [ $"%s{home}/.steam/steam/steamapps/common/Elite Dangerous"
+      $"%s{home}/.local/share/Steam/steamapps/common/Elite Dangerous" ]
     
 // Steam sets LC_ALL=C to help some games, but we need the real value
 // in order to pass the correct language value to the elite dangerous
@@ -33,12 +28,7 @@ let fixLcAll() =
     Threading.Thread.CurrentThread.CurrentUICulture <- CultureInfo.GetCultureInfo(lang.Split('.')[0])
 
 [<Literal>]
-let SteamLib =
-#if WINDOWS
-    "steam_api64.dll"
-#else
-    "libsteam_api.so"
-#endif
+let SteamLib = "libsteam_api.so"
 
 [<DllImport(SteamLib)>]
 extern bool SteamAPI_Init()

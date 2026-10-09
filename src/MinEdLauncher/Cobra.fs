@@ -6,8 +6,6 @@ open System.Globalization
 open System.IO
 open System.Reflection
 open System.Resources
-open System.Runtime.InteropServices
-open System.Security.Cryptography
 open System.Text
 open FsToolkit.ErrorHandling
 open MinEdLauncher
@@ -45,49 +43,11 @@ let getVersion cbLauncherDir =
         
         Ok cobraVersion
 
-let potentialInstallPaths() =
-    if RuntimeInformation.IsOSPlatform(OSPlatform.Windows) then
-        [ Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86), "Frontier")
-          Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Frontier_Developments") ]
-    else []
-
-let private getSalt() = lazy(
-    let err msg = Error $"Couldn't extract salt - {msg}"
-    try
-        let dRingType = Assembly.LoadFrom("ClientSupport.dll").GetType("ClientSupport.DecoderRing")        
-        if dRingType <> null then
-            let saltField = dRingType.GetField("salt", BindingFlags.Static ||| BindingFlags.NonPublic)            
-            if saltField <> null then  
-                saltField.GetValue(null) :?> byte[] |> Ok
-            else
-                err "Unable to reflect salt field"
-        else
-            err "Unable to reflect types for salt"
-    with e -> err (e.ToString()))
-    
 let decrypt text =
-    if RuntimeInformation.IsOSPlatform(OSPlatform.Windows) then
-        let unproctect text salt =
-            try
-                ProtectedData.Unprotect(Convert.FromBase64String(text), salt, DataProtectionScope.CurrentUser) |> Ok
-            with e -> Error (e.ToString())
-        getSalt().Force()
-        |> Result.bind (unproctect text)
-        |> Result.map Encoding.Unicode.GetString
-    else
-        text |> Convert.FromBase64String |> Encoding.Unicode.GetString |> Ok
+    text |> Convert.FromBase64String |> Encoding.Unicode.GetString |> Ok
     
-let encrypt text =
-    if RuntimeInformation.IsOSPlatform(OSPlatform.Windows) then
-        let protect (text: string) salt =
-            try
-                ProtectedData.Protect(Encoding.Unicode.GetBytes(text), salt, DataProtectionScope.CurrentUser) |> Ok
-            with e -> Error (e.ToString())
-        getSalt().Force()
-        |> Result.bind (protect text)
-        |> Result.map Convert.ToBase64String
-    else
-        text |> Encoding.Unicode.GetBytes |> Convert.ToBase64String |> Ok
+let encrypt (text: string) =
+    text |> Encoding.Unicode.GetBytes |> Convert.ToBase64String |> Ok
     
 type CredResult = Found of string * string * string option | NotFound of string | UnexpectedFormat of string | Failure of string
 let readCredentials path = task {
@@ -108,11 +68,6 @@ let readCredentials path = task {
         return CredResult.NotFound path }
 
 let setUserOnly path =
-    // Use preprocessor directive instead of RuntimeInformation.IsOSPlatform so that self-contained exe doesn't
-    // try to extract MonoPosixHelper dlls to home/user/.cache/dotnet_bundle_extract
-#if WINDOWS
-        Ok ()
-#else
         let file = Mono.Unix.UnixFileInfo(path)
         try
             file.FileAccessPermissions <- Mono.Unix.FileAccessPermissions.UserRead ||| Mono.Unix.FileAccessPermissions.UserWrite 
@@ -120,7 +75,6 @@ let setUserOnly path =
         with e ->
             File.Delete(path)
             Error $"Unable to set credential file permissions - {e}"
-#endif
 let saveCredentials path credentials machineToken =
     let nl = Environment.NewLine
     match machineToken with

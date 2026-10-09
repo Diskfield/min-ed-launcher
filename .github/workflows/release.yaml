@@ -16,14 +16,11 @@ jobs:
     name: build
     strategy:
       matrix:
-        kind: ['linux', 'windows']
+        kind: ['linux']
         include:
           - kind: linux
             os: ubuntu-latest
             target: linux-x64
-          - kind: windows
-            os: windows-latest
-            target: win-x64
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout
@@ -32,19 +29,7 @@ jobs:
       - name: Setup dotnet
         uses: actions/setup-dotnet@v4
           
-      - name: Install Rust
-        if: ${{ matrix.target == 'win-x64' }}
-        uses: dtolnay/rust-toolchain@master
-        with:
-          toolchain: stable
-          components: clippy, rustfmt
-
-      - name: Publish Windows
-        if: ${{ matrix.target == 'win-x64' }}
-        run: .\publish.ps1
-        
       - name: Publish Linux
-        if: ${{ matrix.target == 'linux-x64' }}
         run: ./publish.sh
         
       - name: Upload artifacts

@@ -400,9 +400,9 @@ let getSettings args appDir fileConfig = task {
     let filterOverrides = fileConfig.FilterOverrides |> Seq.map (fun o -> o.Sku, o.Filter) |> OrdinalIgnoreCaseMap.ofSeq
     let fallbackDirs platform =
         match platform with
-        | Epic d -> Epic.potentialInstallPaths d.AppId |> findCbLaunchDir
+        | Epic _ -> findCbLaunchDir []
         | Steam -> Steam.potentialInstallPaths() |> findCbLaunchDir
-        | Frontier _-> Cobra.potentialInstallPaths() @ Steam.potentialInstallPaths() |> findCbLaunchDir
+        | Frontier _-> Steam.potentialInstallPaths() |> findCbLaunchDir
         | Dev -> findCbLaunchDir []
         | _ -> Error "Unknown platform. Failed to find Elite Dangerous install directory"
     

@@ -78,10 +78,7 @@ let writeHashCache append path hashMap =
     mapHashMapToLines hashMap |> writeAllLines path
 
 let normalizeManifestPartialPath (path: string) =
-    if not (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) then
-        path.Replace('\\', '/')
-    else
-        path
+    path.Replace('\\', '/')
 
 let mapFileToRequest destDir (file: Types.ProductManifest.File) =
     let path = normalizeManifestPartialPath file.Path
@@ -302,12 +299,9 @@ let validateForRun launcherDir watchForCrashes (product: ProductDetails) =
 let isRunning (product:RunnableProduct) =
     let exeName = Path.GetFileNameWithoutExtension(product.Executable.Name)
     
-    if RuntimeInformation.IsOSPlatform(OSPlatform.Windows) then
-        Process.GetProcessesByName(exeName).Length > 0
-    else
-        // Process.ProcessName seems to be truncated on linux. Not sure if it's always the case or only sometimes
-        // so check both truncated name and full name
-        Process.GetProcessesByName(exeName[..14]).Length > 0 || Process.GetProcessesByName(exeName).Length > 0
+    // Process.ProcessName seems to be truncated on linux. Not sure if it's always the case or only sometimes
+    // so check both truncated name and full name
+    Process.GetProcessesByName(exeName[..14]).Length > 0 || Process.GetProcessesByName(exeName).Length > 0
 
 let createProcessInfo proton args product =
     let fileName, arguments =
@@ -327,10 +321,27 @@ let createProcessInfo proton args product =
     startInfo.RedirectStandardError <- true
     startInfo
 
+/// <summary>
+/// Wrap the process so that it keeps running after the launcher exits
+/// </summary>
+/// <remarks>
+/// The game would otherwise be killed when the launcher quits: its stdout/stderr pipes break (SIGPIPE)
+/// and closing the terminal window sends SIGHUP. Runs the process via sh with stdio pointed at /dev/null and in a
+/// new session (if setsid is available). sh execs the target so the process id stays the same.
+/// </remarks>
+let detachProcessInfo (startInfo: ProcessStartInfo) =
+    let script = "exec </dev/null >/dev/null 2>&1; command -v setsid >/dev/null && exec setsid \\\"$@\\\"; exec \\\"$@\\\""
+    startInfo.Arguments <- $"-c \"%s{script}\" sh \"%s{startInfo.FileName}\" %s{startInfo.Arguments}"
+    startInfo.FileName <- "/bin/sh"
+    startInfo
+
 type RunResult = Ok of Process | AlreadyRunning | DryRun of ProcessStartInfo | Error of exn
-let run dryRun proton args (product:RunnableProduct)  =
-    let startInfo = createProcessInfo proton args product |> Process.overrideLdLibraryPath
-    
+let run dryRun proton detach args (product:RunnableProduct)  =
+    let startInfo =
+        createProcessInfo proton args product
+        |> Process.overrideLdLibraryPath
+        |> fun info -> if detach then detachProcessInfo info else info
+
     Log.debug $"Process: %s{startInfo.FileName} %s{startInfo.Arguments}"
     
     if dryRun then

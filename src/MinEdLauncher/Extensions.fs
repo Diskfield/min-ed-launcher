@@ -460,31 +460,14 @@ module Environment =
             Path.Combine(fallback, AppFolderName)
         else
             Path.Combine(xdgPath, AppFolderName)
-    let private localAppData subDir =
-        let appData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)
-        Path.Combine(appData, AppFolderName, subDir)
     
     let configDirFor name =
-        let specialFolder =
-            if RuntimeInformation.IsOSPlatform(OSPlatform.Windows) then
-                Environment.SpecialFolder.LocalApplicationData
-            else
-                Environment.SpecialFolder.ApplicationData
-        
-        let path = Environment.GetFolderPath(specialFolder)
+        let path = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)
         Path.Combine(path, name)
     
     let configDir = configDirFor AppFolderName
         
-    let cacheDir =
-        if RuntimeInformation.IsOSPlatform(OSPlatform.Windows) then
-            localAppData "cache"
-        else
-            xdgDir "CACHE_HOME" (Path.Combine(home, ".cache"))
+    let cacheDir = xdgDir "CACHE_HOME" (Path.Combine(home, ".cache"))
                 
-    let logDir =
-        if RuntimeInformation.IsOSPlatform(OSPlatform.Windows) then
-            localAppData ""
-        else
-            xdgDir "STATE_HOME" (Path.Combine(home, ".local", "state"))
+    let logDir = xdgDir "STATE_HOME" (Path.Combine(home, ".local", "state"))
         

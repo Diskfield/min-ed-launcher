@@ -4,17 +4,10 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>net8.0</TargetFramework>
     <GenerateProgramFile>false</GenerateProgramFile>
-    <Configurations>Debug;Release;ReleaseWindows</Configurations>
+    <Configurations>Debug;Release</Configurations>
     <Platforms>AnyCPU</Platforms>
     <RootNamespace>EdLauncher.Tests</RootNamespace>
     <LangVersion>preview</LangVersion>
-  </PropertyGroup>
-
-  <PropertyGroup Condition=" '$(Configuration)' == 'ReleaseWindows' ">
-    <Optimize Condition=" '$(Optimize)' == '' ">true</Optimize>
-    <DebugSymbols Condition="'$(DebugSymbols)' == '' ">false</DebugSymbols>
-    <Optimize Condition="'$(Optimize)' == '' ">true</Optimize>
-    <Tailcalls Condition="'$(Tailcalls)' == '' ">true</Tailcalls>
   </PropertyGroup>
 
   <ItemGroup>

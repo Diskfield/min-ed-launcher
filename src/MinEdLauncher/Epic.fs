@@ -11,30 +11,6 @@ open System.Threading.Tasks
 open System.Reflection
 open System.Text
 
-let potentialInstallPaths appId =
-    let progData = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData)
-    Path.Combine(progData, "Epic", "UnrealEngineLauncher", "LauncherInstalled.dat")
-    |> Json.parseFile
-    >>= Json.rootElement
-    >>= Json.parseProp "InstallationList"
-    >>= Json.arrayTryFind (fun e ->
-        let appName = e |> Json.parseProp "AppName" >>= Json.toString |> Result.defaultValue ""
-        appName = appId)
-    |> Result.map (fun element ->
-        element
-        |> Option.bind (fun element ->
-            element |> Json.parseProp "InstallLocation" >>= Json.toString
-            |> function
-                | Ok path -> Some path
-                | Error msg ->
-                    Log.error $"Unable to parse 'InstallLocation': {msg}"
-                    None
-            )
-        |> Option.defaultValue "")
-    |> function
-        | Error msg -> []
-        | Ok dir -> [ dir ]
-        
 let parseJson element =
     let accessToken = element >>= Json.parseProp "access_token" >>= Json.toString
     let expiresIn = element >>= Json.parseProp "expires_in" >>= Json.toInt

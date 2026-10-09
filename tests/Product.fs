@@ -186,6 +186,14 @@ open MinEdLauncher.Tests.Extensions
                     
                     Expect.equal info.WorkingDirectory product.WorkingDir.FullName ""
                 }
+                test "Detached process passes original file name and args through sh" {
+                    let info = Diagnostics.ProcessStartInfo("/path/to/game", "\"arg 1\" arg2")
+
+                    let detached = detachProcessInfo info
+
+                    Expect.equal detached.FileName "/bin/sh" ""
+                    Expect.stringEnds detached.Arguments " sh \"/path/to/game\" \"arg 1\" arg2" ""
+                }
             ]
             testList "generateFileHashStr" [
                 test "converts to hex representation" {

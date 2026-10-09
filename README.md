@@ -3,9 +3,9 @@
 ![GitHub Downloads (all assets, all releases)]
 ![GitHub Downloads (all assets, latest release)]
 
-Cross-platform launcher for the game Elite Dangerous. Created mainly to avoid the long startup
+Linux launcher for the game Elite Dangerous. Created mainly to avoid the long startup
 time of the default launcher when running on Linux. Can be used with Steam, Epic and Frontier
-accounts on both Windows and Linux.
+accounts.
 
 ![preview-gif]
 
@@ -72,11 +72,10 @@ Frontier's website. Linking is only required if you purchased the game via Steam
 
 ### Setup
 #### Steam
-1. Download the [latest release] for your operating system
-2. Extract executable from the zip/tar archive
+1. Download the [latest release]
+2. Extract executable from the tar archive
 3. Place `MinEdLauncher` in your Elite Dangerous install location so that it's in the same folder
-   as `EDLaunch.exe`. `MinEdLauncher.Bootstrap` is for Epic only and may be ignored. To find your install
-   directory:
+   as `EDLaunch.exe`. To find your install directory:
     1. Right click _Elite Dangerous_ in your Steam library
     2. Select _properties_
     3. In the _Local Files_ tab, click _Browse Local Files..._
@@ -84,9 +83,7 @@ Frontier's website. Linking is only required if you purchased the game via Steam
     1. Right click _Elite Dangerous_ in your Steam library
     2. Select _properties_
     3. In the _general_ tab, click _Set Launch Options_
-    4. **Windows users** - Set the value to `cmd /c "MinEdLauncher.exe %command% /autorun /autoquit"`
-
-       **Linux users** - The command will depend on which terminal emulator you use. Examples for
+    4. Set the value to a command that runs `MinEdLauncher` in a terminal emulator. The command will depend on which terminal emulator you use. Examples for
        [alacritty], [gnome-terminal] (Gnome), [xfce4-terminal] (Xfce4), [konsole] (KDE/Steam Deck) and [Ptyxis] (Bazzite) are below.
 
        ```sh alacritty
@@ -108,34 +105,10 @@ Frontier's website. Linking is only required if you purchased the game via Steam
        > Konsole and Ptyxis don't launch when started from the Steam runtime environment. Unsetting LD_LIBRARY_PATH allows them to launch but also causes Proton to run using system libraries causing undefined behavior. Resetting LD_LIBRARY_PATH inside the terminal emulator window solves this.
 5. Launch your game as you normally would in Steam
 #### Epic
-1. Download the [latest release] for your operating system
-2. Extract executable from the zip/tar archive
+1. Download the [latest release]
+2. Extract executable from the tar archive
 3. Place `MinEdLauncher` in your Elite Dangerous install location so that it's in the same folder
    as `EDLaunch.exe`.
-
-##### Windows
-Either configure the Epic client and use the provided Bootstrap exe or use [legendary] to launch the game
-
-* Epic Client
-  1. Delete or rename `EDLaunch.exe` (e.g. `EDLaunch.exe.bak`)
-  2. Copy and rename `MinEdLauncher.Bootstrap.exe` to `EDLaunch.exe`. This step is required because
-     Epic doesn't allow changing the game's startup application. If someone knows how to modify the
-     game's manifest file (`EliteDangerous/.egstore/*.manifest`), this could be avoided. Please open
-     a [new issue] if you can help with this. This also means any time the game updates or you verify
-     your game files, you'll have to replace `EDLaunch.exe` with `MinEdLauncher.Bootstrap.exe`.
-  3. Update your launch options to auto start your preferred product
-      1. Click _Settings_ in the Epic Games Launcher
-      2. Scroll down to the _Manage Games_ section and click _Elite Dangerous_
-      3. Check _Additional Command Line Arguments_
-      4. Set the value to `/autorun /autoquit`
-  4. Launch your game as you normally would in Epic
-* Legendary
-
-    Use legendary's `override-exe` argument via windows terminal
-
-    `legendary.exe launch 9c203b6ed35846e8a4a9ff1e314f6593 --override-exe MinEdLauncher.exe /autorun /autoquit`
-
-##### Linux
 This method utilizes [Legendary].
 
 1. Ensure you've authenticated, installed Elite Dangerous via [legendary] and setup your wine prefix
@@ -150,16 +123,8 @@ This method utilizes [Legendary].
        ```
 
 #### Frontier
-1. Download the [latest release] for Windows
-2. Extract executables from the zip archive
-3. Place `MinEdLauncher.exe` in your Elite Dangerous install location so that it's in the same folder as `EDLaunch.exe`.
-   `MinEdLauncher.Bootstrap` is for Epic only and may be ignored.
-4. Create a shortcut to `MinEdLauncher.exe` by right-clicking it and selecting _create shortcut_
-5. Right-click the newly made shortcut and select _properties_
-6. Add the `/frontier profile-name` argument + your other desired arguments to the end of the _Target_ textbox (e.g. `C:\path\to\MinEdLauncher.exe /frontier profile-name /autorun /autoquit`)
-7. Click _Ok_
-
-You can place this shortcut anywhere. It doesn't have to live in the Elite Dangerous install folder.
+Frontier accounts are launched through Steam or Epic with the `/frontier profile-name` argument. See the
+[multi-account] section for details.
 
 ### Arguments
 #### Shared
@@ -205,12 +170,9 @@ will require re-logging in every few days though, so it may be preferable to jus
 
 ### Settings
 The settings file controls additional settings for the launcher that go beyond what the default
-launcher supports. The location of this file is in the standard config location for your
-operating system. If this file doesn't exist, it will be created on launcher startup.
+launcher supports. The file is in the standard XDG config location. If this file doesn't exist, it will be created on launcher startup.
 
-Windows: `%LOCALAPPDATA%\min-ed-launcher\settings.json`
-
-Linux: `$XDG_CONFIG_HOME/min-ed-launcher/settings.json` (`~/.config` if `$XDG_CONFIG_HOME` isn't set)
+`$XDG_CONFIG_HOME/min-ed-launcher/settings.json` (`~/.config` if `$XDG_CONFIG_HOME` isn't set)
 
 | Key                       | Type   | Default                    | Description                                                                     |
 |---------------------------|--------|----------------------------|---------------------------------------------------------------------------------|
@@ -251,10 +213,6 @@ Your ID and name can be viewed at https://user.frontierstore.net/user/info
 | `keepOpen`          | bool   | `false`      | Don't stop this process when the launcher exits          |
 
 > [!NOTE]
-> When specifying a path for `gameLocation`, `cacheDir` or `processes.fileName` on Windows, it's required to escape backslashes. Make sure to use a
-double backslash (`\\`) instead of a single backslash (`\`).
-
-> [!NOTE]
 > Launching Flatpaks via `processes` through Steam requires resetting the LD_LIBRARY_PATH env var and setting 
 > MEL_LD_LIBRARY_PATH to the host's LD_LIBRARY_PATH.
 > ```sh
@@ -271,15 +229,15 @@ double backslash (`\\`) instead of a single backslash (`\`).
   "checkForLauncherUpdates": true,
   "maxConcurrentDownloads": 4,
   "forceUpdate": ["PUBLIC_TEST_SERVER_OD"],
-  "cacheDir": "C:\\path\\to\\dir",
+  "cacheDir": "/path/to/dir",
   "gameStartDelay": 0,
   "shutdownDelay": 0,
   "processes": [
     {
-      "fileName": "C:\\path\\to\\app.exe"
+      "fileName": "/path/to/app"
     },
     {
-      "fileName": "C:\\path\\to\\app2.exe",
+      "fileName": "/path/to/app2",
       "arguments": "--arg1 --arg2",
       "restartOnRelaunch": true,
       "keepOpen": true
@@ -287,7 +245,7 @@ double backslash (`\\`) instead of a single backslash (`\`).
   ],
   "shutdownProcesses": [
     {
-      "fileName": "C:\\path\\to\\app.exe",
+      "fileName": "/path/to/app",
       "arguments": "--arg1 --arg2"
     }
   ],
@@ -336,17 +294,14 @@ Merge rules:
 By using the `/frontier profile-name` argument, you can login with any number of Frontier accounts with a
 single game installation. Your launch command might look like the following
 
-Windows: `cmd /c "MinEdLauncher.exe %command% /frontier profile-name /autorun /autoquit"`
-
-Linux: `alacritty -e ./MinEdLauncher %command% /frontier profile-name /autorun /autoquit`
+`alacritty -e ./MinEdLauncher %command% /frontier profile-name /autorun /autoquit`
 
 See the [setup] section above for how you might run this on your platform.
 
 If you have multiple frontier accounts, use a different profile name for each of them. After successfully
-logging in, there will be a `.cred` file created in either `%LOCALAPPDATA%\min-ed-launcher\` or 
-`$XDG_CONFIG_DIR/min-ed-launcher/` (depending on OS). This file stores your username, password and machine
-token. On Windows, the password and machine token are encrypted via DPAPI (same as the vanilla launcher).
-On Linux, no encryption happens but the file permissions are set to 600. If you login once and then decide
+logging in, there will be a `.cred` file created in
+`$XDG_CONFIG_DIR/min-ed-launcher/`. This file stores your username, password and machine
+token. No encryption happens but the file permissions are set to 600. If you login once and then decide
 you want to login again (refresh machine token), you can delete the appropriate `.cred` file.
 
 #### Epic account via Steam
@@ -358,33 +313,21 @@ In order to authenticate with an Epic account:
     ```sh
     legendary get-token
     ```
-2. Add the `-auth_password=code` argument to your launch options. `cmd /c "MinEdLauncher.exe %command% /autoquit -auth_password=code"`
-
-   You can also create a separate shortcut. Right click game in your Steam library and create desktop shortcut. Edit the properties of the shortcut
-   to include the `-auth_password=code` argument. `"C:\Program Files (x86)\Steam\Steam.exe" -gameidlaunch 359320 -auth_password=code`. Then just
-   edit this shortcut with the new exchange code each time instead of changing your Steam launch options.
+2. Add the `-auth_password=code` argument to your launch options. `alacritty -e ./MinEdLauncher %command% /autoquit -auth_password=code`
 
 > [!NOTE]
 > If you want to use Steam's installation, you'll need to set `gameLocation` in your [settings] file. For example
 > ```sh
-> "gameLocation": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Elite Dangerous",
-> ```
-
-> [!TIP]
-> If you're just looking to run an Epic account with Steam's game files, you can set the `gameLocation` as noted
-> above, use legendary as outlined in the _legendary_ section of the [Epic setup](#Epic) and include the 
-> `--skip-version-check` argument.
-> ```sh
-> legendary.exe launch 9c203b6ed35846e8a4a9ff1e314f6593 --skip-version-check --override-exe MinEdLauncher.exe /autorun /autoquit
+> "gameLocation": "/home/user/.local/share/Steam/steamapps/common/Elite Dangerous",
 > ```
 
 ### Steam Shortcuts
 You can create multiple shortcuts with different launch parameters. Prefer avoiding the steam protocol handler
 as it has some [quirks] that make it more of a pain to use.
 
-Example _Target_ field for a shortcut that launches Odyssey:
+Example command for a shortcut that launches Odyssey:
 
-`"C:\Program Files (x86)\Steam\Steam.exe" -gameidlaunch 359320 /edo`
+`steam -gameidlaunch 359320 /edo`
 
 ### Icon on Linux
 1. Copy the included `min-ed-launcher.svg` file to your environment's default icon location
@@ -402,25 +345,15 @@ Example _Target_ field for a shortcut that launches Odyssey:
    * kitty - `kitty --class min-ed-launcher ./MinEdLauncher %command% /autorun /autoquit`
 
 ### Troubleshooting
-Debug logging is placed in the standard log location for your operating system:
-* Windows - `%LOCALAPPDATA%\min-ed-launcher\min-ed-launcher.log`
-* Linux - `$XDG_STATE_HOME/min-ed-launcher/min-ed-launcher.log` (`~/.local/state` if `$XDG_STATE_HOME` isn't set)
+Debug logging is placed at `$XDG_STATE_HOME/min-ed-launcher/min-ed-launcher.log` (`~/.local/state` if `$XDG_STATE_HOME` isn't set)
 
 ### Cache
 When updating your game files, the launcher downloads updates into a temporary directory. You may delete these files at any time.
-The location of these files are in the standard cache location for your operating system.
-
-Windows: `%LOCALAPPDATA%\min-ed-launcher\cache`
-
-Linux: `$XDG_CACHE_HOME/min-ed-launcher` (`~/.cache` if `$XDG_CACHE_HOME` isn't set)
+The default location is `$XDG_CACHE_HOME/min-ed-launcher` (`~/.cache` if `$XDG_CACHE_HOME` isn't set)
 
 You can override the default location by specifying the `cacheDir` property in your [settings].
 
 ## Build
-Two different toolchains are needed to build the entire project. .NET is used for the launcher itself and Rust is used
-for the bootstrapper. Since the bootstrapper is only used for users playing via Epic, you may not need to setup both.
-
-### Launcher
 1. Install the [.Net SDK]
 
     At least version 8. In general, min-ed-launcher follows the latest version of the SDK.
@@ -431,23 +364,10 @@ for the bootstrapper. Since the bootstrapper is only used for users playing via 
     $ dotnet build -c Release
     $ dotnet run -c Release --project src/MinEdLauncher/MinEdLauncher.fsproj
    ```
-   If you'd prefer a single, self-contained binary, use `publish` instead of `build`. See [publish.sh] or [publish.ps1] for more details. 
+   If you'd prefer a single, self-contained binary, use `publish` instead of `build`. See [publish.sh] for more details. 
 
-### Bootstrapper
-This project is Windows specific and won't compile on other operating systems.
-
-1. [Install Rust]
-
-   In general, min-ed-launcher follows the latest _stable_ version of the compiler.
-2. After cloning the repo (mentioned above), compile via cargo:
-    ```
-    $ cargo build --release
-    $ .\target\release\bootstrap.exe
-    ```
 ### Release Artifacts
-Run either `publish.sh` or `publish.ps1` depending on your OS. These scripts make use of `dotnet publish`. Artifacts will end up in the `artifacts`folder.
-
-Note that the bootstrap project specifically targets Windows and won't publish on a non-Windows machine.
+Run `publish.sh`. This script makes use of `dotnet publish`. Artifacts will end up in the `artifacts` folder.
 
 [preview-gif]: https://rfvgyhn.blob.core.windows.net/elite-dangerous/min-ed-launcher-demo.gif
 [Settings]: #settings
@@ -459,14 +379,12 @@ Note that the bootstrap project specifically targets Windows and won't publish o
 [details]: #multi-account
 [grinding]: https://www.reddit.com/r/EliteDangerous/comments/ggffqq/psa_2020_farming_engineering_materials_a_compiled/
 [latest release]: https://github.com/Rfvgyhn/min-ed-launcher/releases
-[new issue]: https://github.com/Rfvgyhn/min-ed-launcher/issues
 [alacritty]: https://github.com/alacritty/alacritty
 [gnome-terminal]: https://wiki.gnome.org/Apps/Terminal
 [xfce4-terminal]: https://docs.xfce.org/apps/terminal/start
 [konsole]: https://konsole.kde.org/
 [Ptyxis]: https://gitlab.gnome.org/chergert/ptyxis
 [.Net SDK]: https://dotnet.microsoft.com/download/dotnet
-[install rust]: https://www.rust-lang.org/tools/install
 [Features]: #features
 [Usage]: #usage
 [Steam]: #steam
@@ -488,7 +406,6 @@ Note that the bootstrap project specifically targets Windows and won't publish o
 [heroic]: https://github.com/Heroic-Games-Launcher/HeroicGamesLauncher
 [quirks]: https://github.com/rfvgyhn/min-ed-launcher/issues/45#issuecomment-1030312606
 [publish.sh]: publish.sh
-[publish.ps1]: publish.ps1
 [multi-account]: #frontier-account-via-steam-or-epic
 [Linked Thirdparty Accounts]: https://user.frontierstore.net/user/info
 [GitHub Downloads (all assets, all releases)]: https://img.shields.io/github/downloads/rfvgyhn/min-ed-launcher/total

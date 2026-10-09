@@ -8,38 +8,6 @@ let makeId (machineId:string) (frontierId:string) =
     |> Hex.toStringTrunc 16
     |> fun s -> s.ToLowerInvariant()
 
-module WindowsRegistry =
-    open Microsoft.Win32
-    
-    let private machinePath = @"SOFTWARE\\Microsoft\\Cryptography"
-    let private frontierPath = @"SOFTWARE\\Frontier Developments\\Cryptography"
-    let private key = "MachineGuid"
-    
-    let ensureIdsExist() =
-        let regKey = Registry.CurrentUser.OpenSubKey(frontierPath)
-        if regKey <> null && regKey.GetValue(key) <> null then
-            Ok ()
-        else
-            try
-                let regKey = Registry.CurrentUser.CreateSubKey(frontierPath, RegistryKeyPermissionCheck.ReadWriteSubTree)
-                regKey.SetValue(key, Guid.NewGuid().ToString())
-                Ok ()
-            with
-            | e -> Error e.Message
-    
-    let private getIds() =
-        match ensureIdsExist() with
-        | Ok _ ->
-            let machineId = Registry.LocalMachine.OpenSubKey(machinePath).GetValue(key).ToString()
-            let frontierId = Registry.CurrentUser.OpenSubKey(frontierPath).GetValue(key).ToString()
-            
-            Ok (machineId, frontierId)
-        | Error msg -> Error msg
-        
-    let getId() =
-        getIds()
-        |> Result.map (fun (mId, fId) -> makeId mId fId)
-    
 module WineRegistry =
     let private machineFilePath registryPath = Path.Combine(registryPath, "system.reg")
     let private frontierFilePath registryPath = Path.Combine(registryPath, "user.reg")
@@ -157,9 +125,4 @@ module Filesystem =
         | Error msg -> return Error msg
     }
     
-let getId() =
-#if WINDOWS
-        WindowsRegistry.getId() |> Task.fromResult
-#else
-        WineRegistry.getId()
-#endif
+let getId() = WineRegistry.getId()

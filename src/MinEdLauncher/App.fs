@@ -102,7 +102,7 @@ let launchProduct dryRun proton processArgs productName waitForExit product =
     let args = processArgs()
     Log.info $"Launching %s{productName}"
     
-    match Product.run dryRun proton args product with
+    match Product.run dryRun proton (not waitForExit) args product with
     | Product.RunResult.Ok p ->
         p.BeginErrorReadLine()
         p.BeginOutputReadLine()
@@ -376,7 +376,7 @@ let rec private launchLoop initialLaunch settings playableProducts (session: EdS
 }
 
 let run settings launcherVersion cancellationToken = taskResult {
-    if RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && settings.Platform = Steam then
+    if settings.Platform = Steam then
         Steam.fixLcAll()
     
     let appDataDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Frontier_Developments")
