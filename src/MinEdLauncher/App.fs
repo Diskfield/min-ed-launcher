@@ -7,9 +7,9 @@ open MinEdLauncher
 open MinEdLauncher.Http
 open MinEdLauncher.Token
 open System
-open System.Diagnostics
 open System.Threading.Tasks
 open MinEdLauncher.Types
+open MinEdLauncher.RunningTime
 open FsToolkit.ErrorHandling
 
 type LoginError =
@@ -286,7 +286,7 @@ let private createGetRunningTime httpClient = task {
     }
     return fun () ->
         let runningTime = DateTime.UtcNow.Subtract(localTime);
-        (double remoteTime + runningTime.TotalSeconds)
+        RunningTime (double remoteTime + runningTime.TotalSeconds)
 }
 
 let private renewEpicTokenIfNeeded platform token =
@@ -353,7 +353,7 @@ let rec private launchLoop initialLaunch settings playableProducts (session: EdS
             let mutable tries = 0
             while tries < maxTries do
                 if not (Product.isRunning p) then
-                    do! Task.Delay(TimeSpan.FromSeconds(1))
+                    do! Task.Delay(TimeSpan.FromSeconds(1L))
                     tries <- tries + 1
                 else
                     tries <- maxTries
