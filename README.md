@@ -205,12 +205,13 @@ Your ID and name can be viewed at https://user.frontierstore.net/user/info
 
 #### Process fields
 
-| Field               | Type   | Default      | Description                                              |
-|---------------------|--------|--------------|----------------------------------------------------------|
-| `fileName`          | string | *(required)* | Path to executable                                       |
-| `arguments`         | string | *null*       | Command-line arguments                                   |
-| `restartOnRelaunch` | bool   | `false`      | Restart the process when the game restarts via `/restart` |
-| `keepOpen`          | bool   | `false`      | Don't stop this process when the launcher exits          |
+| Field               | Type   | Default      | Description                                                                   |
+|---------------------|--------|--------------|-------------------------------------------------------------------------------|
+| `fileName`          | string | *(required)* | Path to executable                                                            |
+| `arguments`         | string | *null*       | Command-line arguments                                                        |
+| `alias`             | string | *null*       | Changes CLI output string to specified value instead of outputting `fileName` |
+| `restartOnRelaunch` | bool   | `false`      | Restart the process when the game restarts via `/restart`                     |
+| `keepOpen`          | bool   | `false`      | Don't stop this process when the launcher exits                               |
 
 > [!NOTE]
 > Launching Flatpaks via `processes` through Steam requires resetting the LD_LIBRARY_PATH env var and setting 
@@ -239,6 +240,7 @@ Your ID and name can be viewed at https://user.frontierstore.net/user/info
     {
       "fileName": "/path/to/app2",
       "arguments": "--arg1 --arg2",
+      "alias": "App Two",
       "restartOnRelaunch": true,
       "keepOpen": true
     }
@@ -356,7 +358,7 @@ You can override the default location by specifying the `cacheDir` property in y
 ## Build
 1. Install the [.Net SDK]
 
-    At least version 8. In general, min-ed-launcher follows the latest version of the SDK.
+    At least version 10. In general, min-ed-launcher follows the latest version of the SDK.
 2. Clone repository and build
     ```
     $ git clone https://github.com/rfvgyhn/min-ed-launcher

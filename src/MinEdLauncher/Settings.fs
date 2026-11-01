@@ -1,6 +1,7 @@
 module MinEdLauncher.Settings
 
 open FsToolkit.ErrorHandling
+open Microsoft.Extensions.Configuration.Json
 open Types
 open System
 open System.IO
@@ -32,7 +33,7 @@ let defaults =
       FilterOverrides = OrdinalIgnoreCaseMap.empty
       AdditionalProducts = List.empty
       DryRun = false
-      ShutdownTimeout = TimeSpan.FromSeconds(10)
+      ShutdownTimeout = TimeSpan.FromSeconds(10L)
       CacheDir = ""
       GameStartDelay = TimeSpan.Zero
       ShutdownDelay = TimeSpan.Zero
@@ -191,6 +192,7 @@ let parseArgs defaults (findCbLaunchDir: Platform -> Result<string,string>) (arg
 type ProcessConfig =
     { FileName: string
       Arguments: string option
+      Alias: string option
       RestartOnRelaunch: bool
       KeepOpen: bool }
 [<CLIMutable>]
@@ -303,7 +305,26 @@ let private mergeJsonFiles (baseFile: string) (overlayFile: string) =
     ms.Position <- 0L
     ms
 
+// dotnet 10 changed how JsonConfigurationProvider handles empty arrays from representing them as null to empty string.
+// FsConfig doesn't account for that, so revert the values back to null
+// https://github.com/dotnet/runtime/pull/116677/changes#diff-162070a90aadb0087a56fb2d8ea784a6f642397b6baac9938f0339fc362544a0L70
+let private fixForFsConfig (configRoot: IConfigurationRoot) =
+     let jsonArrays = [ "processes"; "shutdownProcesses"; "filterOverrides"; "accountAliases"; "additionalProducts"; "forceUpdate" ]
+     configRoot.Providers
+     |> Seq.iter (fun provider ->
+         match provider with
+         | :? JsonConfigurationProvider
+         | :? JsonStreamConfigurationProvider ->
+            jsonArrays
+            |> List.iter (fun key ->
+                let found, value = provider.TryGet(key)
+                if found && value = "" then
+                    provider.Set(key, null)
+                )
+         | _ -> ())
+
 let private parseConfigFromRoot (configRoot: IConfigurationRoot) =
+    fixForFsConfig configRoot
     warnUnknownKeys configRoot
     let parseKvps section keyName valueName map =
         configRoot.GetSection(section).GetChildren()
@@ -320,12 +341,19 @@ let private parseConfigFromRoot (configRoot: IConfigurationRoot) =
             |> Seq.choose (fun section ->
                 let fileName = section.GetValue<string>("fileName")
                 let args = section.GetValue<string>("arguments")
+                let alias = section.GetValue<string>("alias")
                 let restart = section.GetValue<bool>("restartOnRelaunch")
                 let keepOpen = section.GetValue<bool>("keepOpen")
                 if String.IsNullOrWhiteSpace(fileName) then
                     None
                 else
-                    Some { FileName = fileName; Arguments = Option.ofObj args; RestartOnRelaunch = restart; KeepOpen = keepOpen })
+                    Some {
+                        FileName = fileName
+                        Arguments = Option.ofObj args
+                        Alias = Option.ofObj alias
+                        RestartOnRelaunch = restart
+                        KeepOpen = keepOpen
+                    })
             |> Seq.toList
     let parseAliases() =
         configRoot.GetSection("accountAliases").GetChildren()
@@ -380,13 +408,13 @@ let private mapProcessConfig p =
             |> Seq.skipWhile _.StartsWith('-')
             |> Seq.tryHead
             |> Option.map (fun appId -> Flatpak (appId, pInfo))
-            |> Option.defaultWith (fun () -> (Host pInfo))
-        | _ -> (Host pInfo)
+            |> Option.defaultWith (fun () -> (Host (p.Alias, pInfo)))
+        | _ -> (Host (p.Alias, pInfo))
     else
-        Host pInfo
+        Host (p.Alias, pInfo)
 let getSettings args appDir fileConfig = task {
     let findCbLaunchDir paths =
-        appDir :: paths
+        Directory.GetCurrentDirectory() :: appDir :: paths
         |> List.map Some
         |> List.append [ fileConfig.GameLocation ]
         |> List.choose id
@@ -424,10 +452,10 @@ let getSettings args appDir fileConfig = task {
                                                           FilterOverrides = filterOverrides
                                                           WatchForCrashes = fileConfig.WatchForCrashes
                                                           AdditionalProducts = fileConfig.AdditionalProducts
-                                                          ShutdownTimeout = TimeSpan.FromSeconds(fileConfig.ShutdownTimeout)
+                                                          ShutdownTimeout = TimeSpan.FromSeconds(int64 fileConfig.ShutdownTimeout)
                                                           CacheDir = fileConfig.CacheDir |> Option.defaultValue Environment.cacheDir
-                                                          GameStartDelay = TimeSpan.FromSeconds(fileConfig.GameStartDelay)
-                                                          ShutdownDelay = TimeSpan.FromSeconds(fileConfig.ShutdownDelay)
+                                                          GameStartDelay = TimeSpan.FromSeconds(int64 fileConfig.GameStartDelay)
+                                                          ShutdownDelay = TimeSpan.FromSeconds(int64 fileConfig.ShutdownDelay)
                                                           AccountAliases = fileConfig.AccountAliases |> Map.ofList
                                            })
 }

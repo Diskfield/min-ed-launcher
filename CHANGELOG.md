@@ -1,5 +1,27 @@
 # Changelog
 
+## [0.14.0] - 2026-06-14
+
+### New Features
+- Add support for process name aliases. Allows changing/hiding the name that appears in the output. ([#217])
+  
+  Set the new `alias` property in your [process configuration].
+  ```json
+  "processes": [{
+    "fileName": "C:\\path\\to\\app.exe",
+    "alias": "App Name"
+  }]
+  ```
+  
+### Enhancements
+- Include the process' current working directory as a potential location for Elite install directory ([#211] - [@9ParsonsB]) 
+
+### Misc
+- Update `fTime` query param formatting in Frontier API calls to match changes in default launcher
+
+### Security
+- Address [CVE-2026-96225] and [CVE-2026-96231] by building with latest version of the dotnet SDK (>= 10.0.402)
+
 ## [0.13.0] - 2026-06-01
 
 ### New Features
@@ -425,7 +447,8 @@ legendary launch --dry-run 9c203b6ed35846e8a4a9ff1e314f6593 2> >(grep "Launch pa
 
 Initial release
 
-[unreleased]: https://github.com/rfvgyhn/min-ed-launcher/compare/v0.13.0...HEAD
+[unreleased]: https://github.com/rfvgyhn/min-ed-launcher/compare/v0.14.0...HEAD
+[0.14.0]: https://github.com/rfvgyhn/min-ed-launcher/compare/v0.13.0...HEAD
 [0.13.0]: https://github.com/rfvgyhn/min-ed-launcher/compare/v0.12.2...v0.13.0
 [0.12.2]: https://github.com/rfvgyhn/min-ed-launcher/compare/v0.12.1...v0.12.2
 [0.12.1]: https://github.com/rfvgyhn/min-ed-launcher/compare/v0.12.0...v0.12.1
@@ -471,10 +494,13 @@ Initial release
 [CVE-2024-30105]: https://github.com/dotnet/announcements/issues/315
 [CVE-2024-38095]: https://github.com/dotnet/announcements/issues/312
 [CVE-2025-30399]: https://github.com/dotnet/announcements/issues/362
+[CVE-2026-96225]: https://github.com/dotnet/announcements/issues/476
+[CVE-2026-96231]: https://github.com/dotnet/announcements/issues/479
 [legendary]: https://github.com/derrod/legendary
 [heroic]: https://github.com/Heroic-Games-Launcher/HeroicGamesLauncher
 [settings file]: README.md#settings
 [settings overlay]: README.md#settings-overlay
+[process configuration]: README.md#process-fields
 [log file]: README.md#troubleshooting
 [EDDiscovery]: https://github.com/EDDiscovery/EDDiscovery
 [EDOMH]: https://github.com/jixxed/ed-odyssey-materials-helper
@@ -490,4 +516,7 @@ Initial release
 [#198]: https://github.com/rfvgyhn/min-ed-launcher/issues/198
 [#199]: https://github.com/rfvgyhn/min-ed-launcher/issues/199
 [#205]: https://github.com/rfvgyhn/min-ed-launcher/issues/205
+[#211]: https://github.com/rfvgyhn/min-ed-launcher/issues/211
+[#217]: https://github.com/rfvgyhn/min-ed-launcher/issues/217
+[@9ParsonsB]: https://github.com/9ParsonsB
 [@Teal Bauer]: https://github.com/teal-bauer

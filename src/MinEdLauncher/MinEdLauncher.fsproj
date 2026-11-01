@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <LangVersion>preview</LangVersion>
     <Configurations>Debug;Release</Configurations>
     <Platforms>AnyCPU</Platforms>
@@ -28,6 +28,7 @@
     <Compile Include="Log.fs" />
     <Compile Include="Token.fs" />
     <Compile Include="Types.fs" />
+    <Compile Include="RunningTime.fs" />
     <Compile Include="Http.fs" />
     <Compile Include="Github.fs" />
     <Compile Include="Process.fs" />
@@ -56,16 +57,16 @@
     <PackageReference Include="FsConfig" Version="4.1.0" />
     <PackageReference Include="FsToolkit.ErrorHandling" Version="4.15.2" />
     <PackageReference Include="FsToolkit.ErrorHandling.TaskResult" Version="4.15.2" />
-    <PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="8.0.1" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.13" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="10.0.13" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.13" />
     <PackageReference Include="Mono.Posix.NETStandard" Version="5.20.1-preview" />
     <PackageReference Include="Serilog" Version="3.1.1" />
     <PackageReference Include="Serilog.Sinks.Console" Version="5.0.1" />
     <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
     <PackageReference Include="Serilog.Sinks.File.Header" Version="1.0.2" />
     <PackageReference Include="TypeShape" Version="10.0.0" />
-    <PackageReference Update="FSharp.Core" Version="8.0.200" />
+    <PackageReference Update="FSharp.Core" Version="10.1.402" />
   </ItemGroup>
 
 </Project>
